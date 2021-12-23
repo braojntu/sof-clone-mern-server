@@ -176,7 +176,6 @@ router.put("/question/status/:id/:status", (req, res) => {
 
 //Get question based on id
 //  URL :{endpoint}api/get/allposts/questionId/:id
-
 router.get("/get/allposts/questionId/:id", async (req, res) => {
   try {
     const questionItem = await Question.find({_id: req.params.id});
@@ -279,7 +278,6 @@ router.get("/get/questions/:tag", verifyToken, (req, res) => {
 
 // Get all users
 // URL :{endpoint}/get/users
-
 router.get("/get/users", verifyToken, async (req, res) => {
   jwt.verify(req.token, config.jwtSecretKey, async (err, authData) => {
     if (err) {
@@ -297,7 +295,6 @@ router.get("/get/users", verifyToken, async (req, res) => {
 
 //Register User
 //URL :{endpoint}/api/register
-
 router.post("/register", async (req, res) => {
   console.log(req.body);
   User.find({email: req.body.email})
@@ -305,6 +302,7 @@ router.post("/register", async (req, res) => {
     .then((users) => {
       if (users.length > 0) {
         return res.status(409).json({
+          status: false,
           message: "Auth Failed! Email already Registered!",
         });
       } else {
@@ -342,7 +340,6 @@ router.post("/register", async (req, res) => {
 
 //User Login
 //URL :{endpoint}/api/login
-
 router.post("/login", async (req, res) => {
   User.find({email: req.body.email})
     .exec()
@@ -351,12 +348,13 @@ router.post("/login", async (req, res) => {
         return res.status(401).json({
           status: true,
           message:
-            "This email is not Registered! Try loging-in with a registred email.",
+            "This email is not Registered! Try loging-in with a registered email.",
         });
       } else {
         bcrypt.compare(req.body.password, users[0].password, (err, result) => {
           if (err) {
             return res.status(401).json({
+              status: false,
               message: "Auth Failed!",
             });
           }
@@ -378,6 +376,7 @@ router.post("/login", async (req, res) => {
           }
 
           return res.status(401).json({
+            status: false,
             message: "Auth Failed!",
           });
         });
