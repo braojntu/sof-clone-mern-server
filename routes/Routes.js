@@ -296,46 +296,46 @@ router.get("/get/users", verifyToken, async (req, res) => {
 //Register User
 //URL :{endpoint}/api/register
 router.post("/register", async (req, res) => {
-  console.log(req.body);
-  User.find({email: req.body.email})
-    .exec()
-    .then((users) => {
-      if (users.length > 0) {
-        return res.status(409).json({
-          status: false,
-          message: "Auth Failed! Email already Registered!",
+  const users = User.find({email: req.body.email});
+
+  if (users.length > 0) {
+    return res.status(409).json({
+      status: false,
+      message: "Auth Failed! Email already Registered!",
+    });
+  } else {
+    bcrypt.hash(req.body.password, 10, (err, hash) => {
+      if (err) {
+        return res.status(500).json({
+          error: err,
         });
       } else {
-        bcrypt.hash(req.body.password, 10, (err, hash) => {
-          if (err) {
-            return res.status(500).json({
-              error: err,
-            });
-          } else {
-            const newUser = new User({
-              _id: new mongoose.Types.ObjectId(),
-              userName: req.body.username,
-              email: req.body.email,
-              password: hash,
-            });
-            newUser
-              .save()
-              .then((result) => {
-                return res.status(201).json({
-                  status: true,
-                  message: "Registered Succesfully!",
-                });
-              })
-              .catch((err) => {
-                return res.status(500).json({
-                  status: false,
-                  message: err,
-                });
-              });
-          }
+        const newUser = new User({
+          _id: new mongoose.Types.ObjectId(),
+          userName: req.body.userName,
+          email: req.body.email,
+          password: hash,
         });
+        newUser
+          .save()
+          .then((result) => {
+            console.log(result);
+            return res.status(201).json({
+              status: true,
+              message: "Registered Succesfully!",
+              userID: result._id,
+              userName: result.userName,
+            });
+          })
+          .catch((err) => {
+            return res.status(500).json({
+              status: false,
+              message: err,
+            });
+          });
       }
     });
+  }
 });
 
 //User Login
